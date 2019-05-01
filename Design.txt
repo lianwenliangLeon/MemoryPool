@@ -1,11 +1,16 @@
 MemoryPool
-	取得内存：判断指针池里是否有足够的空间，找到满足的指针，分配空间，返回指针。
-	释放内存
+	
 		
 	
-	
 
 
-ptr_memory_block
-	ptr 指向的内存块
+
+PtrMemoryBlcok （指向内存块的指针）
+	MemoryBlock* 指向的内存快
+	PtrMemoryBlock* 上一个指向内存块的指针
+	PtrMemoryBlock* 下一个指向内存块的指针
 	
+MemoryBlock （内存块）
+	backBlock 在此内存块之后 还剩余能使用的内存快
+	ptrIndex 指向此内存块的指针的相对索引
+	PtrMemoryBlock *
