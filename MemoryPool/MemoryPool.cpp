@@ -1,20 +1,42 @@
-﻿// MemoryPool.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
+﻿#include"MemoryPool.h"
+#include<memory>
 
-#include <iostream>
-
-int main()
+//内存池起始地址对齐 向上取整
+size_t check_algin_addr(void*& pBuf)
 {
-    std::cout << "Hello World!\n"; 
+	size_t align = 0;
+	size_t addr = (int)pBuf;
+	align = (ADDR_ALIGN - addr % ADDR_ALIGN) % ADDR_ALIGN;
+	pBuf = (char*)pBuf + align;
+	return align;
 }
 
-// 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
-// 调试程序: F5 或调试 >“开始调试”菜单
+/*内存块大小对齐*/
+size_t check_algin_addr(size_t size)
+{
+	size_t align = size % MINUMITSIZE;
 
-// 入门提示: 
-//   1. 使用解决方案资源管理器窗口添加/管理文件
-//   2. 使用团队资源管理器窗口连接到源代码管理
-//   3. 使用输出窗口查看生成输出和其他消息
-//   4. 使用错误列表窗口查看错误
-//   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
-//   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
+	return size - align;
+}
+
+/*分配内存大小对齐到SIZE_ALIGN*/
+size_t check_align_size(size_t size)
+{
+	size = (size + SIZE_ALIGN - 1) / SIZE_ALIGN * SIZE_ALIGN;
+	return size;
+}
+
+/*
+构建内存池
+pBuf:给定的内存起始地址
+sBufSize：给定的内存大小
+*/
+MemoryPool * MemoryPool::CreateMemoryPool(void* pBuf, size_t sBufSize)
+{
+	memset(pBuf, 0, sBufSize);
+	MemoryPool* MP = (MemoryPool*)pBuf;
+	size_t MemoryPoolSize = sizeof(MemoryPool);
+	MP->mem_map_pool_count = (sBufSize - MemoryPoolSize + MINUMITSIZE - 1) / MINUMITSIZE;//向上取整 块数
+	MP->mem_map_unit_count = (sBufSize - MemoryPoolSize + MINUMITSIZE - 1) / MINUMITSIZE;//向上取整 块数
+	MP->ptrMemoryMap = (MemoryBlock*)((char*)pBuf + MemoryPoolSize);
+}
