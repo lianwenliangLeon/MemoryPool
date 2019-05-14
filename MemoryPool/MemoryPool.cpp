@@ -106,6 +106,20 @@ void* MemoryPool::GetMemory(size_t sMemorySize)
 	{
 		if (tmp->blockPtr->backBlock * MINUMITSIZE >= sMemorySize)
 			break;// 找足够大的区域
+		tmp = tmp->next;
+	}
+	if (index == free_mem_chunk_count)
+	{
+		return NULL;
+	}
+	mem_used_size += sMemorySize;//已用空间增加
+	if (tmp->blockPtr->backBlock == sMemorySize)
+	{
+		//需要的内存刚好和当前链表指向的内存块大小相等
+		size_t current_index = (tmp->blockPtr - ptrMemoryMap);//计算当前块头的相对索引
+		deletePtr(tmp);/*将节点从链表中分离*/
+
+
 	}
 }
 
@@ -148,5 +162,41 @@ bool MemoryPool::push_front(PtrMemoryBlock*& head, PtrMemoryBlock* element)//在
 		head->pre = element;
 	}
 	head = element;
+	return true;
+}
+
+bool MemoryPool::deletePtr(PtrMemoryBlock * element)
+{
+	if (element == NULL)
+	{
+		return;
+	}
+	else if (element == pfreeMemory)//element在头部
+	{
+		if (pfreeMemory->pre == pfreeMemory)
+		{
+			pfreeMemory = NULL;
+		}
+		else
+		{
+			pfreeMemory = element->next;
+			pfreeMemory->pre = element->pre;
+			pfreeMemory->pre->next = pfreeMemory;
+		}
+	}
+	//element在尾部
+	else if (element->next == pfreeMemory)
+	{
+		pfreeMemory->pre = element->pre;
+		element->pre->next = pfreeMemory;
+	}
+	else
+	{
+		element->pre->next = element->next;
+		element->next->pre = element->pre;
+	}
+	element->pre = NULL;
+	element->next = NULL;
+	
 	return true;
 }
