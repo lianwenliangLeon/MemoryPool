@@ -11,7 +11,7 @@ class MemoryBlock
 {
 public:
 	int backBlock;//后面还有多少连续的空余内存卡=块
-	int ptrIndex;//指向这块内存块区域的指针的相对索引
+	int strIndex;//这块内存块区域的首部的相对索引
 	PtrMemoryBlock* ptr;//指向 指向这块内存块的指针
 };
 
@@ -40,6 +40,14 @@ private:
 	size_t free_mem_chunk_count;// 记录 现在使用的链表的结点数
 	size_t mem_map_unit_count;
 	size_t mem_block_count;// 记录内存块个数
+	MemoryPool()
+	{
+
+	}
+	~MemoryPool()
+	{
+		free(memory);
+	}
 public:
 	static MemoryPool* CreateMemoryPool(void* pBuf, size_t PoolSize);
 	void* GetMemory(size_t MemorySize);
@@ -50,7 +58,7 @@ public:
 	bool push_front(PtrMemoryBlock *& head,PtrMemoryBlock* element);
 	bool deletePtr(PtrMemoryBlock* element);
 	size_t addrToIndex(void* addr);
-	size_t indexToAddr(size_t index);
+	void * indexToAddr(size_t index);//索引转化为地址
 	void* GetMemory(size_t getMemorySize);
 	bool FreeMemory(void* ptrMemoryBlock);
 };
